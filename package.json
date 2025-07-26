@@ -1,0 +1,25 @@
+{
+  "name": "mathvis",
+  "version": "1.0.0",
+  "description": "A Hackathon project for https://boot.dev, intended to visualize matrix transformation in easy to digest way.",
+  "main": "engine.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RGnt/MathVis.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/RGnt/MathVis/issues"
+  },
+  "homepage": "https://github.com/RGnt/MathVis#readme",
+  "dependencies": {
+    "@tailwindcss/cli": "^4.1.11",
+    "tailwindcss": "^4.1.11"
+  }
+}
