@@ -1,4 +1,4 @@
-import { TrigOps } from "./math.js";
+import { MatrixOps, TrigOps } from "./math.js";
 // import { TRS } from "./scenegraph.js";
 
 export class Engine {
@@ -17,18 +17,147 @@ export class Engine {
     colorAttributeLocation;
     matrixLocation;
 
-    zooming = false;
     fieldOfViewRadians = TrigOps.degToRad(60);
+
+    lastPos = null;
+    moving = false;
+    movementType = null;
+    panKeyHold = false;
 
     constructor(canvasId) {
         this.canvas = document.querySelector(canvasId);
         this.gl = this.canvas.getContext("webgl2");
-        this.lastTime = Date.now();
 
         if (!this.gl) {
             throw new Error("GL done goof, sorry!");
         }
         // this.TRS = new TRS();
+    }
+
+    setEventListeners() {
+        this.gl.canvas.addEventListener("wheel", (e) => {
+            e.preventDefault();
+            let zoom =
+                TrigOps.radToDeg(this.fieldOfViewRadians) + e.deltaY * -0.1;
+            zoom = Math.min(Math.max(30, zoom), 120);
+
+            this.fieldOfViewRadians = TrigOps.degToRad(zoom);
+        });
+
+        this.gl.canvas.addEventListener("mousedown", (e) => {
+            e.preventDefault();
+            if (this.panKeyHold) {
+                this.movementType = "pan";
+            }
+            if (this.movementType === null) {
+                this.movementType = "rotate";
+            }
+            this.startRotateOrPanCamera(e);
+        });
+
+        window.addEventListener("keydown", (e) => {
+            // e.preventDefault();
+            if (e.key === "Alt" && !this.panKeyHold) {
+                this.panKeyHold = true;
+                this.movementType = "pan";
+            }
+        });
+
+        window.addEventListener("mouseup", () => {
+            this.stopRotateOrPanCamera();
+        });
+        window.addEventListener("keyup", (e) => {
+            if (e.key === "Alt" && this.panKeyHold) {
+                this.panKeyHold = false;
+                this.movementType = "rotate";
+            }
+        });
+
+        window.addEventListener("mousemove", (e) => {
+            this.rotateOrPanCamera(e);
+        });
+
+        this.gl.canvas.addEventListener("touchstart", (e) => {
+            e.preventDefault();
+            this.startRotateOrPanCamera(e.touches[0]);
+        });
+        window.addEventListener("touchend", (e) => {
+            this.stopRotateOrPanCamera(e.touches[0]);
+        });
+        window.addEventListener("touchmove", (e) => {
+            this.rotateOrPanCamera(e.touches[0]);
+        });
+    }
+
+    startRotateOrPanCamera(e) {
+        this.lastPos = this.getRelativeMousePosition(e);
+        this.moving = true;
+    }
+
+    rotateOrPanCamera(e) {
+        if (this.moving) {
+            const pos = this.getRelativeMousePosition(e);
+            const size = [4 / this.gl.canvas.width, 4 / this.gl.canvas.height];
+
+            // These 2 need to be replaced by math.js
+            function sub(a, ...args) {
+                const n = a.slice();
+                [...args].forEach((p) => {
+                    n[0] -= p[0];
+                    n[1] -= p[1];
+                });
+                return n;
+            }
+
+            function mult(a, s) {
+                if (Array.isArray(s)) {
+                    let t = s;
+                    s = a;
+                    a = t;
+                }
+                if (Array.isArray(s)) {
+                    return [a[0] * s[0], a[1] * s[1]];
+                } else {
+                    return [a[0] * s, a[1] * s];
+                }
+            }
+
+            const delta = mult(sub(this.lastPos, pos), size);
+
+            this.lastPos = pos;
+
+            switch (this.movementType) {
+                case "rotate":
+                    this.rotation[0] += delta[1] * 5;
+                    this.rotation[1] += delta[0] * 5;
+                    break;
+
+                case "pan":
+                    this.translation[0] += delta[0] * -500;
+                    this.translation[1] += delta[1] * 500;
+                    break;
+            }
+        }
+    }
+
+    stopRotateOrPanCamera() {
+        this.moving = false;
+        this.movementType = null;
+        this.lastPos = null;
+    }
+
+    getRelativeMousePosition(e) {
+        const rect = this.gl.canvas.getBoundingClientRect();
+        const x =
+            ((e.clientX - rect.left) / (rect.right - rect.left)) *
+            this.gl.canvas.width;
+        const y =
+            ((e.clientY - rect.top) / (rect.bottom - rect.top)) *
+            this.gl.canvas.height;
+        return [
+            (x - this.gl.canvas.width / 2) / window.devicePixelRatio,
+            (y - this.gl.canvas.height / 2) / window.devicePixelRatio,
+        ];
     }
 
     Update() {
