@@ -40,6 +40,7 @@ function setEventListeners() {
     let lastPos;
     let moving = false;
     let movementType = null;
+    let panKeyHold = false;
 
     engine.gl.canvas.addEventListener("wheel", (e) => {
         e.preventDefault();
@@ -52,6 +53,9 @@ function setEventListeners() {
 
     engine.gl.canvas.addEventListener("mousedown", (e) => {
         e.preventDefault();
+        if (panKeyHold) {
+            movementType = "pan";
+        }
         if (movementType === null) {
             movementType = "rotate";
         }
@@ -60,7 +64,8 @@ function setEventListeners() {
 
     window.addEventListener("keydown", (e) => {
         // e.preventDefault();
-        if (e.key === "Alt") {
+        if (e.key === "Alt" && !panKeyHold) {
+            panKeyHold = true;
             console.log("keypress");
             movementType = "pan";
         }
@@ -68,7 +73,8 @@ function setEventListeners() {
 
     window.addEventListener("mouseup", stopRotateOrPanCamera);
     window.addEventListener("keyup", (e) => {
-        if (e.key === "Alt") {
+        if (e.key === "Alt" && panKeyHold) {
+            panKeyHold = false;
             console.log("keypress");
             movementType = "rotate";
         }
