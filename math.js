@@ -107,6 +107,6 @@ export const MatrixOps = {
 };
 
 export const TrigOps = {
-    radToDeg: 180 / Math.PI,
-    degToRad: Math.PI / 180,
+    radToDeg: (r) => (r * 180) / Math.PI,
+    degToRad: (d) => (d * Math.PI) / 180,
 };

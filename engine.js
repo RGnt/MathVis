@@ -6,19 +6,19 @@ export class Engine {
     gl = null;
     vertex_shader = null;
     fragment_shader = null;
-    translation = [200, 400, 0];
+    translation = [0, 0, -1000];
     rotation = [
-        30 * TrigOps.degToRad,
-        -20 * TrigOps.degToRad,
-        0 * TrigOps.degToRad,
+        TrigOps.degToRad(30),
+        TrigOps.degToRad(-20),
+        TrigOps.degToRad(0),
     ];
-    scale = [1, 1, 1];
+    // scale = [1, 1, 1];
     positionAttributeLocation;
     colorAttributeLocation;
     matrixLocation;
 
     zooming = false;
-    fieldOfView = 60;
+    fieldOfViewRadians = TrigOps.degToRad(60);
 
     constructor(canvasId) {
         this.canvas = document.querySelector(canvasId);
@@ -34,28 +34,26 @@ export class Engine {
     Update() {
         const aspect = this.gl.canvas.clientWidth / this.gl.canvas.clientHeight;
 
-        this.matrix = m4.orthographic(
-            0,
-            this.gl.canvas.clientWidth,
-            0,
-            this.gl.canvas.clientHeight,
-            400,
-            -400
+        const projectionMatrix = m4.perspective(
+            this.fieldOfViewRadians,
+            aspect,
+            1,
+            2000
         );
 
-        // THIS IS CAUSING ISSUES
-        if (this.zooming) {
-            console.log(this.fieldOfView);
-            this.matrix = m4.perspective(
-                this.fieldOfView * TrigOps.degToRad,
-                aspect,
-                1,
-                2000
-            );
-        }
+        // Compute the camera's matrix using look at.
+        const cameraPosition = [0, 0, 100];
+        const target = [0, 0, 0];
+        const up = [0, 1, 0];
+        const cameraMatrix = m4.lookAt(cameraPosition, target, up);
+
+        // Make a view matrix from the camera matrix.
+        const viewMatrix = m4.inverse(cameraMatrix);
+
+        const viewProjectionMatrix = m4.multiply(projectionMatrix, viewMatrix);
 
         this.matrix = m4.translate(
-            this.matrix,
+            viewProjectionMatrix,
             this.translation[0],
             this.translation[1],
             this.translation[2]
@@ -63,13 +61,8 @@ export class Engine {
         this.matrix = m4.xRotate(this.matrix, this.rotation[0]);
         this.matrix = m4.yRotate(this.matrix, this.rotation[1]);
         this.matrix = m4.zRotate(this.matrix, this.rotation[2]);
-
-        // this.matrix = m4.multiply(this.matrix, matrix);
-
-        // Set the matrix.
-        return this.matrix;
     }
-    Draw(program, matrix) {
+    Draw(program) {
         webglUtils.resizeCanvasToDisplaySize(this.gl.canvas);
 
         // Tell WebGL how to convert from clip space to pixels
@@ -155,7 +148,7 @@ export class Engine {
         this.gl.enableVertexAttribArray(this.colorAttributeLocation);
 
         this.gl.useProgram(program);
-        this.gl.uniformMatrix4fv(this.matrixLocation, false, matrix);
+        this.gl.uniformMatrix4fv(this.matrixLocation, false, this.matrix);
 
         // Draw the geometry.
         const primitiveType = this.gl.LINES;
