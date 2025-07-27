@@ -63,12 +63,16 @@ function setEventListeners() {
         if (e.key === "Alt") {
             console.log("keypress");
             movementType = "pan";
-            // startRotateOrPanCamera(e);
         }
     });
 
     window.addEventListener("mouseup", stopRotateOrPanCamera);
-    window.addEventListener("keyup", stopRotateOrPanCamera);
+    window.addEventListener("keyup", (e) => {
+        if (e.key === "Alt") {
+            console.log("keypress");
+            movementType = "rotate";
+        }
+    });
 
     window.addEventListener("mousemove", rotateOrPanCamera);
 
