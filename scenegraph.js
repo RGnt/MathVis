@@ -1,26 +1,26 @@
-export class TRS {
-    constructor() {
-        this.translation = [0, 0, 0];
-        this.rotation = [0, 0, 0];
-        this.scale = [1, 1, 1];
-    }
+// export class TRS {
+//     constructor() {
+//         this.translation = [0, 0, 0];
+//         this.rotation = [0, 0, 0];
+//         this.scale = [1, 1, 1];
+//     }
 
-    getMatrix(dst) {
-        dst = dst || new Float32Array(16);
-        var t = this.translation;
-        var r = this.rotation;
-        var s = this.scale;
-        // compute a matrix from translation, rotation, and scale
-        m4.translation(t[0], t[1], t[2], dst);
-        m4.xRotate(dst, r[0], dst);
-        m4.yRotate(dst, r[1], dst);
-        m4.zRotate(dst, r[2], dst);
-        m4.scale(dst, s[0], s[1], s[2], dst);
-        return dst;
-    }
-}
+//     getMatrix(dst) {
+//         dst = dst || new Float32Array(16);
+//         var t = this.translation;
+//         var r = this.rotation;
+//         var s = this.scale;
+//         // compute a matrix from translation, rotation, and scale
+//         m4.translation(t[0], t[1], t[2], dst);
+//         m4.xRotate(dst, r[0], dst);
+//         m4.yRotate(dst, r[1], dst);
+//         m4.zRotate(dst, r[2], dst);
+//         m4.scale(dst, s[0], s[1], s[2], dst);
+//         return dst;
+//     }
+// }
 
-// class Node {
+// export class Node {
 //     constructor(source) {
 //         this.children = [];
 //         this.localMatrix = m4.identity();
@@ -67,39 +67,10 @@ export class TRS {
 // }
 
 // function main() {
-//     // Get A WebGL context
-//     /** @type {HTMLCanvasElement} */
-//     var canvas = document.querySelector("#canvas");
-//     var gl = canvas.getContext("webgl2");
-//     if (!gl) {
-//         return;
-//     }
-
-//     // Tell the twgl to match position with a_position, n
-//     // normal with a_normal etc..
-//     twgl.setAttributePrefix("a_");
-
-//     var cubeBufferInfo = flattenedPrimitives.createCubeBufferInfo(gl, 1);
-
-//     // setup GLSL program
-//     var programInfo = twgl.createProgramInfo(gl, [vs, fs]);
-
-//     var cubeVAO = twgl.createVAOFromBufferInfo(gl, programInfo, cubeBufferInfo);
-
-//     function degToRad(d) {
-//         return (d * Math.PI) / 180;
-//     }
-
-//     var fieldOfViewRadians = degToRad(60);
-
-//     var objectsToDraw = [];
-//     var objects = [];
-//     var nodeInfosByName = {};
-
 //     // Let's make all the nodes
 //     var blockGuyNodeDescriptions = {
-//         name: "point between feet",
-//         draw: false,
+//         name: "main matrix",
+//         draw: true,
 //         children: [
 //             {
 //                 name: "waist",
@@ -311,5 +282,3 @@ export class TRS {
 //         requestAnimationFrame(drawScene);
 //     }
 // }
-
-// main();

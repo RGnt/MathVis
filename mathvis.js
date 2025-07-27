@@ -37,47 +37,59 @@ function main() {
 main();
 
 function setEventListeners() {
+    let lastPos;
+    let moving = false;
+    let movementType = null;
+
     engine.gl.canvas.addEventListener("wheel", (e) => {
         e.preventDefault();
-        console.log("event caught");
-        console.log(e.deltaY);
-
         let zoom =
             TrigOps.radToDeg(engine.fieldOfViewRadians) + e.deltaY * -0.1;
         zoom = Math.min(Math.max(30, zoom), 120);
-        console.log(zoom);
 
         engine.fieldOfViewRadians = TrigOps.degToRad(zoom);
     });
 
-    let lastPos;
-    let moving = false;
-
     engine.gl.canvas.addEventListener("mousedown", (e) => {
         e.preventDefault();
-        startRotateCamera(e);
+        if (movementType === null) {
+            movementType = "rotate";
+        }
+        startRotateOrPanCamera(e);
     });
 
-    window.addEventListener("mouseup", stopRotateCamera);
-    window.addEventListener("mousemove", rotateCamera);
+    window.addEventListener("keydown", (e) => {
+        // e.preventDefault();
+        if (e.key === "Alt") {
+            console.log("keypress");
+            movementType = "pan";
+            // startRotateOrPanCamera(e);
+        }
+    });
+
+    window.addEventListener("mouseup", stopRotateOrPanCamera);
+    window.addEventListener("keyup", stopRotateOrPanCamera);
+
+    window.addEventListener("mousemove", rotateOrPanCamera);
 
     engine.gl.canvas.addEventListener("touchstart", (e) => {
         e.preventDefault();
-        startRotateCamera(e.touches[0]);
+        startRotateOrPanCamera(e.touches[0]);
     });
     window.addEventListener("touchend", (e) => {
-        stopRotateCamera(e.touches[0]);
+        stopRotateOrPanCamera(e.touches[0]);
     });
     window.addEventListener("touchmove", (e) => {
-        rotateCamera(e.touches[0]);
+        rotateOrPanCamera(e.touches[0]);
     });
 
-    function startRotateCamera(e) {
+    function startRotateOrPanCamera(e) {
         lastPos = getRelativeMousePosition(engine.gl.canvas, e);
+        console.log("lastpos start: ", lastPos);
         moving = true;
     }
 
-    function rotateCamera(e) {
+    function rotateOrPanCamera(e) {
         if (moving) {
             const pos = getRelativeMousePosition(engine.gl.canvas, e);
             const size = [
@@ -85,16 +97,30 @@ function setEventListeners() {
                 4 / engine.gl.canvas.height,
             ];
             const delta = v2.mult(v2.sub(lastPos, pos), size);
-
-            engine.rotation[0] += delta[1] * 5;
-            engine.rotation[1] += delta[0] * 5;
-
+            console.log("pos: ", pos);
+            console.log("lastpost: ", lastPos);
+            console.log("delta: ", delta);
             lastPos = pos;
+
+            switch (movementType) {
+                case "rotate":
+                    engine.rotation[0] += delta[1] * 5;
+                    engine.rotation[1] += delta[0] * 5;
+                    break;
+
+                case "pan":
+                    engine.translation[0] += delta[0] * -500;
+                    engine.translation[1] += delta[1] * 500;
+                    console.log("translation: ", engine.translation);
+                    break;
+            }
         }
     }
 
-    function stopRotateCamera() {
+    function stopRotateOrPanCamera() {
         moving = false;
+        movementType = null;
+        lastPos = null;
     }
 
     function lerp(a, b, t) {
@@ -103,6 +129,7 @@ function setEventListeners() {
 
     function getRelativeMousePosition(canvas, e) {
         const rect = canvas.getBoundingClientRect();
+        const aspect = canvas.clientWidth / canvas.clientHeight;
         const x =
             ((e.clientX - rect.left) / (rect.right - rect.left)) * canvas.width;
         const y =

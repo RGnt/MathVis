@@ -42,6 +42,7 @@ export class Engine {
         );
 
         // Compute the camera's matrix using look at.
+        // Camera does nothing for now
         const cameraPosition = [0, 0, 100];
         const target = [0, 0, 0];
         const up = [0, 1, 0];
@@ -51,7 +52,6 @@ export class Engine {
         const viewMatrix = m4.inverse(cameraMatrix);
 
         const viewProjectionMatrix = m4.multiply(projectionMatrix, viewMatrix);
-
         this.matrix = m4.translate(
             viewProjectionMatrix,
             this.translation[0],
