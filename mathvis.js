@@ -47,8 +47,8 @@ function main() {
   //   let extents;
   //   let bufferInfo;
   //   let vao;
-  
   const program = new GLProgram(engine.gl).addShader(vertexShaderSource, "vert").addShader(fragmentShaderSource, "frag").compileProgram().program;
+
 
   // look up where the vertex data needs to go.
   var positionAttributeLocation = engine.gl.getAttribLocation(program, "a_position");
