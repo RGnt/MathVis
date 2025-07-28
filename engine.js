@@ -185,7 +185,7 @@ class Engine {
     Update() {
         const aspect = this.gl.canvas.clientWidth / this.gl.canvas.clientHeight;
 
-        const projectionMatrix = m4.perspective(
+        const projectionMatrix = MatrixOps.Create.perspective(
             this.fieldOfViewRadians,
             aspect,
             1,
@@ -197,21 +197,24 @@ class Engine {
         const cameraPosition = [0, 0, 100];
         const target = [0, 0, 0];
         const up = [0, 1, 0];
-        const cameraMatrix = m4.lookAt(cameraPosition, target, up);
+
+        const cameraMatrix = MatrixOps.Create.lookAt(cameraPosition, target, up);
 
         // Make a view matrix from the camera matrix.
         const viewMatrix = m4.inverse(cameraMatrix);
 
         const viewProjectionMatrix = m4.multiply(projectionMatrix, viewMatrix);
+
         this.matrix = m4.translate(
             viewProjectionMatrix,
             this.translation[0],
             this.translation[1],
             this.translation[2]
         );
-        this.matrix = m4.xRotate(this.matrix, this.rotation[0]);
-        this.matrix = m4.yRotate(this.matrix, this.rotation[1]);
-        this.matrix = m4.zRotate(this.matrix, this.rotation[2]);
+
+        this.matrix = MatrixOps.Rotate.X(this.matrix, this.rotation[0]);
+        this.matrix = MatrixOps.Rotate.Y(this.matrix, this.rotation[1]);
+        this.matrix = MatrixOps.Rotate.Z(this.matrix, this.rotation[2]); 
     }
     Draw(program) {
         resizeCanvasToDisplaySize(this.gl.canvas);

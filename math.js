@@ -37,6 +37,17 @@ class Vector {
     }
 }
 
+const VectorOps = {
+    len: (vec) => Math.hypot(...vec),
+    sub: (vec1, vec2) => vec1.map((dim, i) => dim - vec2[i]),
+    normalize: (vec) => VectorOps.len(vec) > 0.0000001 ? vec.map(dim => dim / VectorOps.len(vec)) : vec,
+    cross: (vec1, vec2) => [
+        vec1[1] * vec2[2] - vec1[2] * vec2[1],
+        vec1[2] * vec2[0] - vec1[0] * vec2[2],
+        vec1[0] * vec2[1] - vec1[1] * vec2[0]
+    ],
+}
+
 const MatrixOps = {
     // from: https://rikyperdana.medium.com/matrix-operations-in-functional-js-e3463f36b160
     withAs: (obj, cb) => cb(obj),
@@ -104,6 +115,84 @@ const MatrixOps = {
             ...MatrixOps.shifter(MatrixOps.matrixSize(matrix), 1),
             (i, j) => matrix[j][i]
         ),
+    Create: {
+        perspective: (fovRad, aspect, near, far) => {
+            const fov = Math.tan(Math.PI * 0.5 - 0.5 * fovRad);
+            const rangeInv = 1.0 / (near - far);
+
+            return [
+                fov / aspect, 0, 0, 0,
+                0, fov, 0, 0,
+                0, 0, (near + far) * rangeInv, -1,
+                0, 0, near * far * rangeInv * 2, 0
+            ];
+        },
+        lookAt: (camPos, tar, up) => {
+
+            const zAxis = VectorOps.normalize(VectorOps.sub(camPos, tar));
+            const xAxis = VectorOps.normalize(VectorOps.cross(up, zAxis));
+            const yAxis = VectorOps.normalize(VectorOps.cross(zAxis, xAxis));
+            return [
+                ...xAxis, 0,
+                ...yAxis, 0,
+                ...zAxis, 0,
+                ...camPos, 1
+            ]
+        }
+    },
+    Rotate: {
+        X: (mat, radAng) => {
+            const cosine = Math.cos(radAng);
+            const sine = Math.sin(radAng);
+
+            return [
+                mat[0], mat[1], mat[2], mat[3],
+                cosine * mat[4] + sine * mat[8],
+                cosine * mat[5] + sine * mat[9],
+                cosine * mat[6] + sine * mat[10],
+                cosine * mat[7] + sine * mat[11],
+                cosine * mat[8] - sine * mat[4],
+                cosine * mat[9] - sine * mat[5],
+                cosine * mat[10] - sine * mat[6],
+                cosine * mat[11] - sine * mat[7],
+                mat[12], mat[13], mat[14], mat[15]
+            ];
+        },
+        Y: (mat, radAng) => {
+            const cosine = Math.cos(radAng);
+            const sine = Math.sin(radAng);
+
+            return [
+                cosine * mat[0] - sine * mat[8],
+                cosine * mat[1] - sine * mat[9],
+                cosine * mat[2] - sine * mat[10],
+                cosine * mat[3] - sine * mat[11],
+                mat[4], mat[5], mat[6], mat[7],
+                cosine * mat[8] + sine * mat[0],
+                cosine * mat[9] + sine * mat[1],
+                cosine * mat[10] + sine * mat[2],
+                cosine * mat[11] + sine * mat[3],
+                mat[12], mat[13], mat[14], mat[15]
+            ]
+        },
+        Z: (mat, radAng) => {
+            const cosine = Math.cos(radAng);
+            const sine = Math.sin(radAng);
+            return [
+                cosine * mat[0] + sine * mat[4],
+                cosine * mat[1] + sine * mat[5],
+                cosine * mat[2] + sine * mat[6],
+                cosine * mat[3] + sine * mat[7],
+
+                cosine * mat[4] - sine * mat[0],
+                cosine * mat[5] - sine * mat[1],
+                cosine * mat[6] - sine * mat[2],
+                cosine * mat[7] - sine * mat[3],
+                mat[8], mat[9], mat[10], mat[11],
+                mat[12], mat[13], mat[14], mat[15]
+            ]
+        },
+    }
 };
 
 const TrigOps = {
