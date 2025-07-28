@@ -1,6 +1,28 @@
 // import { MatrixOps, TrigOps } from "./math.js";
 // import { TRS } from "./scenegraph.js";
 
+/**
+   * Resize a canvas to match the size its displayed.
+   * @param {HTMLCanvasElement} canvas The canvas to resize.
+   * @param {number} [multiplier] amount to multiply by.
+   *    Pass in window.devicePixelRatio for native pixels.
+   * @return {boolean} true if the canvas was resized.
+   * @memberOf module:webgl-utils
+   */
+function resizeCanvasToDisplaySize(canvas, multiplier) {
+    multiplier = multiplier || 1;
+    const width = canvas.clientWidth * multiplier | 0;
+    const height = canvas.clientHeight * multiplier | 0;
+    if (canvas.width !== width || canvas.height !== height) {
+        canvas.width = width;
+        canvas.height = height;
+        return true;
+    }
+    return false;
+}
+
+
+
 class Engine {
     canvas = null;
     gl = null;
@@ -192,7 +214,7 @@ class Engine {
         this.matrix = m4.zRotate(this.matrix, this.rotation[2]);
     }
     Draw(program) {
-        webglUtils.resizeCanvasToDisplaySize(this.gl.canvas);
+        resizeCanvasToDisplaySize(this.gl.canvas);
 
         // Tell WebGL how to convert from clip space to pixels
         this.gl.viewport(0, 0, this.gl.canvas.width, this.gl.canvas.height);
